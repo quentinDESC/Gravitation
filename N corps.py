@@ -1,22 +1,21 @@
-
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
 
-#Conditions initiales :
-N= 10
+#Conditions initiales ,paramètres:
+N= 10 #nb_planetes
 G=1
-dt=1
+dt=0.05 #meilleur paramètre qu'on a trouvé
 masse =np.random.uniform(1,5,N)
-pos = np.random.uniform(0,10, (N, 2))
+pos = np.random.uniform(0,100, (N, 2))
 vit = np.zeros((N,2))
 
 fig, ax = plt.subplots()
 
 def distance(pos):
     diff = pos[np.newaxis, :, :] - pos[:, np.newaxis, :]
-    norme = np.sqrt(np.sum(diff**2, axis=2))
+    norme = np.clip(10**(-5),np.sqrt(np.sum(diff**2, axis=2)))
     np.fill_diagonal(norme, np.inf)
     return diff, norme
 
@@ -28,7 +27,7 @@ def calcul_acceleration(pos,masse):
 
 
 #ax.axis('equal')
-ax.set(xlim=[-10, 10], ylim=[-10,10])
+ax.set(xlim=[-100, 100], ylim=[-100,100])
 
 
 def get_new_position(pos, masse):
@@ -42,21 +41,20 @@ scat = ax.scatter(pos[:,0], pos[:,1])
 
 
 def animate(t):
-    # une variable globale est une variable utilisée dans une fonction mais dont la modification de la valeur a une portée globale (donc extérieure à la fonction)
 
-    global positions
-    positions = get_new_position(pos,masse)
+    global pos
 
-    # update the scatter plot:
-    # le np.stack sert ici à mettre les positions dans la bonne shape
-    data = np.stack(positions).T
-    scat.set_offsets(data)
-    return scat
+    for _ in range(10):
+        pos = get_new_position(pos,masse)
+
+    
+    scat.set_offsets(pos)
+    return scat,
 
 ani = animation.FuncAnimation(
     fig=fig,
     func=animate,
-    interval=100,
+    interval=20,
     cache_frame_data=False,
 )
 plt.show()
